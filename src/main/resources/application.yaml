@@ -1,3 +1,22 @@
 spring:
   application:
     name: CouponApp
+  flyway:
+    locations: "database/migration"
+    user: admin
+    password: admin
+    schemas: shop
+    url: jdbc:h2:mem:mydb
+  datasource:
+    url: jdbc:h2:mem:mydb
+    username: admin
+    password: admin
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      mode: never
