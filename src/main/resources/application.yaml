@@ -1,3 +1,7 @@
 spring:
   application:
     name: CouponApp
+geoloc:
+  country:
+    file:
+      location: "src/main/resources/ipDb/GeoLite2-Country.mmdb"

@@ -4,13 +4,20 @@ import com.example.couponapp.dto.mapper.CouponMapper;
 import com.example.couponapp.dto.request.CreateCouponRequest;
 import com.example.couponapp.dto.request.RedeemCouponRequest;
 import com.example.couponapp.dto.response.CreateCouponResponse;
+import com.example.couponapp.dto.response.RedeemCouponResponse;
 import com.example.couponapp.entity.Coupon;
 import com.example.couponapp.repository.CouponRepository;
+import com.example.couponapp.util.validation.CouponValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import static com.example.couponapp.util.CouponMessagesUtil.COUPON_ALREADY_EXIST;
+import static com.example.couponapp.util.CouponMessagesUtil.COUPON_REDEEMED_SUCCESS;
+import static com.example.couponapp.util.GeolocationUtil.extractCountryFromIpAddress;
 
 @Service
 @RequiredArgsConstructor
@@ -18,22 +25,38 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class CouponServiceImpl implements CouponService {
 
     private final CouponRepository couponRepository;
+    private final CouponValidator couponValidator;
 
     @Override
-    public String redeemCoupon(RedeemCouponRequest redeemCouponRequest) {
-        return "";
+    @Transactional
+    public ResponseEntity<RedeemCouponResponse> redeemCoupon(RedeemCouponRequest redeemCouponRequest) {
+        var country = extractCountryFromIpAddress(redeemCouponRequest.ipAddress());
+        var couponName = redeemCouponRequest.couponName();
+        var couponOpt = couponRepository.findByCouponNameIsIgnoreCase(couponName);
+        var errorResponse = couponValidator.validateRedeemCouponRequest(country, couponOpt);
+        if(errorResponse.getErrorMessage() != null ) {
+            return ResponseEntity.badRequest()
+                    .body(errorResponse);
+        } else {
+            incrementCouponUsage(couponName, country);
+        }
+        return ResponseEntity.ok().body(
+                RedeemCouponResponse.builder()
+                        .successMessage(COUPON_REDEEMED_SUCCESS)
+                        .build()
+        );
     }
 
     @Override
     public ResponseEntity<CreateCouponResponse> createCoupon(CreateCouponRequest createCouponRequest) {
         var coupon = CouponMapper.INSTANCE.createRequestToEntity(createCouponRequest);
-        if(!couponAlreadyExists(createCouponRequest.couponName(), createCouponRequest.country())) {
+        if(!couponValidator.couponAlreadyExist(createCouponRequest.couponName())) {
             coupon = couponRepository.save(coupon);
         } else {
             return ResponseEntity.badRequest()
                     .body(
                             CreateCouponResponse.builder()
-                                    .errorMessage("Coupon with that name already exists")
+                                    .errorMessage(COUPON_ALREADY_EXIST)
                                     .build());
         }
         return ResponseEntity.created(
@@ -51,7 +74,7 @@ public class CouponServiceImpl implements CouponService {
                 .build();
     }
 
-    private boolean couponAlreadyExists(String couponName, String country) {
-       return couponRepository.existsByCouponNameIsLikeIgnoreCaseAndCountry(couponName, country);
+    private void incrementCouponUsage(String couponName, String country) {
+        couponRepository.updateCurrentUsageInCoupon(couponName, country);
     }
 }

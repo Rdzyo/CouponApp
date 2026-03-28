@@ -33,7 +33,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
     implementation 'org.springframework.boot:spring-boot-starter-flyway'
     implementation 'org.flywaydb:flyway-database-postgresql'
-
+    implementation 'com.maxmind.geoip2:geoip2:5.0.2'
     //mapper
     implementation 'org.mapstruct:mapstruct:1.6.3'
 
