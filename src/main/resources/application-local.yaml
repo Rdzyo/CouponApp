@@ -1,0 +1,11 @@
+spring:
+  flyway:
+    locations: "database/migration"
+    user: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/coupon_app
+  datasource:
+    url: jdbc:postgresql://localhost:5432/coupon_app
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
