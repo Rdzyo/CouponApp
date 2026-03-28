@@ -9,15 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class CouponControllerTestIT {
+@ActiveProfiles("test")
+public class CouponControllerTestIT extends BaseITTest {
+
 
     @Autowired
     MockMvc mockMvc;
@@ -47,9 +50,11 @@ public class CouponControllerTestIT {
             " , 1, PL",
             "NIL, 1, PL",
             "'', 1, PL",
+            "t$st, 1, PL",
             "test, 0, PL",
             "test, 1, ''",
-            "test, 1, NIL"
+            "test, 1, NIL",
+            "test, 1, POL"
     }, nullValues = "NIL"
     )
     void shouldReturnValidationErrorWithGivenValues(String couponName, Integer maxUsage, String country) throws Exception {

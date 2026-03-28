@@ -21,10 +21,13 @@ import java.time.Instant;
 public class Coupon {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "coupon_name")
     private String couponName;
+    @Column(name = "max_usage")
     private int maxUsage;
+    @Column(name = "current_usage")
     private int currentUsage;
     private String country;
     @Column(name = "created_date", nullable = false, updatable = false)
