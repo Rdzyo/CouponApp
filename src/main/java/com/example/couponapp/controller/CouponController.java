@@ -3,6 +3,7 @@ package com.example.couponapp.controller;
 import com.example.couponapp.dto.request.CreateCouponRequest;
 import com.example.couponapp.dto.request.RedeemCouponRequest;
 import com.example.couponapp.dto.response.CreateCouponResponse;
+import com.example.couponapp.dto.response.RedeemCouponResponse;
 import com.example.couponapp.service.CouponService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class CouponController {
     private final CouponService couponService;
 
     @PostMapping(value = "/redeemCoupon", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String redeemCoupon(@RequestBody @Valid RedeemCouponRequest redeemCouponRequest) {
+    public ResponseEntity<RedeemCouponResponse> redeemCoupon(@RequestBody @Valid RedeemCouponRequest redeemCouponRequest) {
         return couponService.redeemCoupon(redeemCouponRequest);
     }
 

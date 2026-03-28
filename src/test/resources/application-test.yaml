@@ -1,3 +1,7 @@
 spring:
   flyway:
     locations: "database/migration"
+geoloc:
+  country:
+    file:
+      location: "src/main/resources/ipDb/GeoLite2-Country.mmdb"

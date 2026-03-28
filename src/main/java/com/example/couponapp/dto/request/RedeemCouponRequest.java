@@ -1,4 +1,15 @@
 package com.example.couponapp.dto.request;
 
-public record RedeemCouponRequest(Long userId, String couponName, String ipAddress ) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record RedeemCouponRequest(
+        @NotNull
+        Long customerId,
+        @NotNull
+        @NotBlank
+        String couponName,
+        @NotNull
+        @NotBlank
+        String ipAddress ) {
 }

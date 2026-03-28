@@ -1,6 +1,8 @@
 package com.example.couponapp.controller;
 
 import com.example.couponapp.dto.request.CreateCouponRequest;
+import com.example.couponapp.dto.request.RedeemCouponRequest;
+import com.example.couponapp.util.CouponMessagesUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -66,5 +68,97 @@ public class CouponControllerTestIT extends BaseITTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldRedeemCouponSuccessfully() throws Exception {
+        //given
+        var couponName = "test";
+        var maxUsage = 1;
+        var country = "PL";
+        var customerId = 1L;
+        var ipAddress = "217.119.64.172";
+        var createCouponRequest = new CreateCouponRequest(couponName, maxUsage, country);
+        var redeemCouponRequest = new RedeemCouponRequest(customerId, couponName, ipAddress);
+
+        //when
+        mockMvc.perform(post("/createCoupon")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createCouponRequest)));
+
+        //then
+        mockMvc.perform(post("/redeemCoupon")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(redeemCouponRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.successMessage").value(CouponMessagesUtil.COUPON_REDEEMED_SUCCESS));
+    }
+
+    @Test
+    void shouldFailRedeemCouponIfCouponDoesNotExist() throws Exception {
+        //given
+        var couponName = "test";
+        var customerId = 1L;
+        var ipAddress = "217.119.64.172";
+        var redeemCouponRequest = new RedeemCouponRequest(customerId, couponName, ipAddress);
+
+        //expect
+        mockMvc.perform(post("/redeemCoupon")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(redeemCouponRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorMessage").value(CouponMessagesUtil.COUPON_DOES_NOT_EXIST));
+    }
+
+    @Test
+    void shouldFailRedeemCouponIfIsNotAvailableForCountry() throws Exception {
+        //given
+        var couponName = "test";
+        var maxUsage = 1;
+        var country = "US";
+        var customerId = 1L;
+        var ipAddress = "217.119.64.172";
+        var createCouponRequest = new CreateCouponRequest(couponName, maxUsage, country);
+        var redeemCouponRequest = new RedeemCouponRequest(customerId, couponName, ipAddress);
+
+        //when
+        mockMvc.perform(post("/createCoupon")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createCouponRequest)));
+
+        //then
+        mockMvc.perform(post("/redeemCoupon")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(redeemCouponRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorMessage").value(CouponMessagesUtil.COUPON_IS_NOT_AVAILABLE_FOR_COUNTRY));
+    }
+
+    @Test
+    void shouldFailRedeemCouponIfItHasBeenFullyUsed() throws Exception {
+        //given
+        var couponName = "test";
+        var maxUsage = 1;
+        var country = "PL";
+        var customerId = 1L;
+        var ipAddress = "217.119.64.172";
+        var createCouponRequest = new CreateCouponRequest(couponName, maxUsage, country);
+        var redeemCouponRequest = new RedeemCouponRequest(customerId, couponName, ipAddress);
+
+        //when
+        mockMvc.perform(post("/createCoupon")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createCouponRequest)));
+
+        mockMvc.perform(post("/redeemCoupon")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(redeemCouponRequest)));
+
+        //then
+        mockMvc.perform(post("/redeemCoupon")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(redeemCouponRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorMessage").value(CouponMessagesUtil.COUPON_MAX_USAGE_REACHED));
     }
 }
