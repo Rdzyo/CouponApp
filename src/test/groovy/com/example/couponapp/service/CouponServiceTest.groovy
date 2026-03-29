@@ -4,10 +4,12 @@ import com.example.couponapp.dto.request.CreateCouponRequest
 import com.example.couponapp.dto.request.RedeemCouponRequest
 import com.example.couponapp.dto.response.RedeemCouponResponse
 import com.example.couponapp.entity.Coupon
+import com.example.couponapp.entity.Customer
 import com.example.couponapp.repository.CouponRepository
-import com.example.couponapp.util.CouponMessagesUtil
+import com.example.couponapp.repository.CustomerRepository
+import com.example.couponapp.util.message.CouponMessagesUtil
 import com.example.couponapp.util.GeolocationUtil
-import com.example.couponapp.util.validation.CouponValidator
+import com.example.couponapp.validation.CouponValidator
 import org.springframework.http.HttpStatus
 import org.springframework.test.util.ReflectionTestUtils
 import spock.lang.Specification
@@ -17,13 +19,15 @@ import java.time.Instant
 class CouponServiceTest extends Specification {
 
     CouponRepository couponRepository
+    CustomerRepository customerRepository
     CouponValidator couponValidator
     CouponService couponService
 
     def setup() {
         couponRepository = Mock(CouponRepository)
+        customerRepository = Mock(CustomerRepository)
         couponValidator = Mock(CouponValidator)
-        couponService = new CouponServiceImpl(couponRepository, couponValidator)
+        couponService = new CouponServiceImpl(couponRepository, customerRepository, couponValidator)
         ReflectionTestUtils.setField(GeolocationUtil.class, "GEO_COUNTRY_FILE_PATH", "src/main/resources/ipDb/GeoLite2-Country.mmdb")
     }
 
@@ -80,7 +84,8 @@ class CouponServiceTest extends Specification {
         var ipAddr = "217.119.64.172"
         var request = new RedeemCouponRequest(customerId, couponName, ipAddr)
         couponRepository.findByCouponNameIsIgnoreCase(_ as String) >> Optional.of(testCoupon())
-        couponValidator.validateRedeemCouponRequest(_ as String, _ as Optional) >> RedeemCouponResponse.builder().build()
+        customerRepository.findById(_ as Long) >> Optional.of(testCustomer())
+        couponValidator.validateRedeemCouponRequest(_ as String, _ as Optional, _ as Long) >> RedeemCouponResponse.builder().build()
 
         when:
         var response = couponService.redeemCoupon(request)
@@ -97,7 +102,8 @@ class CouponServiceTest extends Specification {
         var ipAddr = "217.119.64.172"
         var request = new RedeemCouponRequest(customerId, couponName, ipAddr)
         couponRepository.findByCouponNameIsIgnoreCase(_ as String) >> Optional.of(testCoupon())
-        couponValidator.validateRedeemCouponRequest(_ as String, _ as Optional) >> RedeemCouponResponse.builder().errorMessage(CouponMessagesUtil.COUPON_ALREADY_EXIST).build()
+        customerRepository.findById(_ as Long) >> Optional.of(testCustomer())
+        couponValidator.validateRedeemCouponRequest(_ as String, _ as Optional, _ as Long) >> RedeemCouponResponse.builder().errorMessage(CouponMessagesUtil.COUPON_ALREADY_EXIST).build()
 
         when:
         var response = couponService.redeemCoupon(request)
@@ -114,7 +120,8 @@ class CouponServiceTest extends Specification {
         var ipAddr = "217.119.64.172"
         var request = new RedeemCouponRequest(customerId, couponName, ipAddr)
         couponRepository.findByCouponNameIsIgnoreCase(_ as String) >> Optional.of(testCoupon())
-        couponValidator.validateRedeemCouponRequest(_ as String, _ as Optional) >> RedeemCouponResponse.builder().errorMessage(CouponMessagesUtil.COUPON_IS_NOT_AVAILABLE_FOR_COUNTRY).build()
+        customerRepository.findById(_ as Long) >> Optional.of(testCustomer())
+        couponValidator.validateRedeemCouponRequest(_ as String, _ as Optional, _ as Long) >> RedeemCouponResponse.builder().errorMessage(CouponMessagesUtil.COUPON_IS_NOT_AVAILABLE_FOR_COUNTRY).build()
 
         when:
         var response = couponService.redeemCoupon(request)
@@ -131,7 +138,8 @@ class CouponServiceTest extends Specification {
         var ipAddr = "217.119.64.172"
         var request = new RedeemCouponRequest(customerId, couponName, ipAddr)
         couponRepository.findByCouponNameIsIgnoreCase(_ as String) >> Optional.of(testCoupon())
-        couponValidator.validateRedeemCouponRequest(_ as String, _ as Optional) >> RedeemCouponResponse.builder().errorMessage(CouponMessagesUtil.COUPON_MAX_USAGE_REACHED).build()
+        customerRepository.findById(_ as Long) >> Optional.of(testCustomer())
+        couponValidator.validateRedeemCouponRequest(_ as String, _ as Optional, _ as Long) >> RedeemCouponResponse.builder().errorMessage(CouponMessagesUtil.COUPON_MAX_USAGE_REACHED).build()
 
         when:
         var response = couponService.redeemCoupon(request)
@@ -143,5 +151,9 @@ class CouponServiceTest extends Specification {
 
     static testCoupon() {
         return new Coupon(id: 1L, couponName: "test", country: "PL", maxUsage: 10, currentUsage: 0, createdDate: Instant.now())
+    }
+
+    static testCustomer() {
+        return new Customer(id: 1L, fullName: "Test Guy", redeemedCoupons: new HashSet<Coupon>())
     }
 }

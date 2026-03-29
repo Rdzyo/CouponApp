@@ -25,6 +25,24 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     )
     boolean couponExistsAndIsUsable(@Param("couponName") String couponName, @Param("country") String country);*/
 
+    //Works, but it might be discussed if it makes sense
+    @Query(value = """
+            SELECT CASE WHEN EXISTS (
+                    SELECT c.id
+                    FROM customer_x_coupon cc
+                    INNER JOIN Customer c
+                            ON cc.customer_id = :customerId
+                    INNER JOIN Coupon co
+                            ON cc.coupon_id = co.id
+                     WHERE cc.coupon_id = :couponId
+                    )
+                    THEN CAST(1 AS BIT)
+                    ELSE CAST(0 AS BIT) END
+            """,
+            nativeQuery = true
+    )
+    boolean searchCouponIsRedeemedByCustomer(@Param("couponId") Long couponId, @Param("customerId") Long customerId);
+
     @Modifying
     @Query(
             value = """
