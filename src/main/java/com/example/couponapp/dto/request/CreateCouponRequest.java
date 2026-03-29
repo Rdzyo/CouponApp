@@ -19,6 +19,7 @@ public record CreateCouponRequest(
         @Schema(description = "Name of the coupon", defaultValue = "couponName")
         String couponName,
         @Min(value = 1, message = VALUE_MORE_THAN_ZERO)
+        @Schema(description = "Maximum value of usages of the coupon", defaultValue = "10")
         Integer maxUsage,
         @NotNull(message = VALUE_NOT_NULL)
         @NotBlank(message = VALUE_NOT_BLANK)

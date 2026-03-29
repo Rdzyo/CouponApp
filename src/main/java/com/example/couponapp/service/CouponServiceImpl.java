@@ -44,7 +44,7 @@ public class CouponServiceImpl implements CouponService {
         } else {
             var coupon = couponOpt.get();
             var customer = customerOpt.get();
-            incrementCouponUsage(couponName, country);
+            incrementCouponUsage(couponName);
             saveCustomer(customer, coupon);
         }
         return ResponseEntity.ok().body(
@@ -86,7 +86,7 @@ public class CouponServiceImpl implements CouponService {
         customerRepository.save(customer);
     }
 
-    private void incrementCouponUsage(String couponName, String country) {
-        couponRepository.updateCurrentUsageInCoupon(couponName, country);
+    private void incrementCouponUsage(String couponName) {
+        couponRepository.updateCurrentUsageInCoupon(couponName);
     }
 }
