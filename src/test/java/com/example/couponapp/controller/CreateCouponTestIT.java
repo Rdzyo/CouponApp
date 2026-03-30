@@ -1,6 +1,7 @@
 package com.example.couponapp.controller;
 
 import com.example.couponapp.dto.request.CreateCouponRequest;
+import com.example.couponapp.entity.Coupon;
 import com.example.couponapp.repository.CouponRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.example.couponapp.util.message.CouponMessagesUtil.COUPON_ALREADY_EXIST;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,6 +55,27 @@ public class CreateCouponTestIT extends BaseITTest {
                 .andExpect(jsonPath("$.couponName").value("test"))
                 .andExpect(jsonPath("$.maxUsage").value(1))
                 .andExpect(jsonPath("$.country").value("PL"));
+    }
+
+    @Test
+    void shouldReturn409IfCouponAlreadyExists() throws Exception {
+        //given
+        var couponName = "test";
+        var maxUsage = 1;
+        var country = "PL";
+        var request = new CreateCouponRequest(couponName, maxUsage, country);
+        var coupon = new Coupon();
+        coupon.setCouponName(couponName);
+        coupon.setMaxUsage(maxUsage);
+        coupon.setCountry(country);
+        couponRepository.save(coupon);
+
+        //expect
+        mockMvc.perform(post("/createCoupon")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errorMessage").value(COUPON_ALREADY_EXIST));
     }
 
     @ParameterizedTest

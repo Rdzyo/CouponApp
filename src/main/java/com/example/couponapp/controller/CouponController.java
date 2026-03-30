@@ -40,7 +40,7 @@ public class CouponController {
     @Tag(name = "Create Coupon")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Coupon successfully created"),
-            @ApiResponse(responseCode = "400", description = "Coupon with that name already exists")
+            @ApiResponse(responseCode = "409", description = "Coupon with that name already exists")
     })
     @PostMapping(value = "/createCoupon", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CreateCouponResponse> createCoupon(@RequestBody @Valid CreateCouponRequest createCouponRequest) {

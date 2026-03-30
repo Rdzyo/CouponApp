@@ -60,7 +60,7 @@ class CouponServiceTest extends Specification {
         body.maxUsage == maxUsage
     }
 
-    def "Should return 400 and message that object exists"() {
+    def "Should return 409 and message that object exists"() {
         given:
         var couponName = "test"
         var maxUsage = 1
@@ -72,7 +72,7 @@ class CouponServiceTest extends Specification {
         var response = couponService.createCoupon(request)
 
         then:
-        response.statusCode == HttpStatus.BAD_REQUEST
+        response.statusCode == HttpStatus.CONFLICT
         response.getBody().errorMessage == CouponMessagesUtil.COUPON_ALREADY_EXIST
         0 * couponRepository.save(_ as Coupon)
     }
