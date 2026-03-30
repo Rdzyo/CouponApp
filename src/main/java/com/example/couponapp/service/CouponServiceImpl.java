@@ -12,6 +12,7 @@ import com.example.couponapp.repository.CustomerRepository;
 import com.example.couponapp.validation.CouponValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +60,7 @@ public class CouponServiceImpl implements CouponService {
     public ResponseEntity<CreateCouponResponse> createCoupon(CreateCouponRequest createCouponRequest) {
         var coupon = CouponMapper.INSTANCE.createRequestToEntity(createCouponRequest);
         if(couponValidator.couponAlreadyExist(createCouponRequest.couponName())) {
-            return ResponseEntity.badRequest()
+            return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(
                             CreateCouponResponse.builder()
                                     .errorMessage(COUPON_ALREADY_EXIST)
