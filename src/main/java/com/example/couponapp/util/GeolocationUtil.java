@@ -38,7 +38,7 @@ public class GeolocationUtil {
             return country.isoCode();
             //Could be handled better, more time needed
         } catch (IOException | GeoIp2Exception e) {
-            log.info("Geolocation had a problem with translating ip to country");
+            log.info("Geolocation had a problem with translating ip: {} to country", ipAddress);
             return "Wrong ip address";
         }
     }
