@@ -6,3 +6,6 @@ CREATE TABLE IF NOT EXISTS coupon (
     country VARCHAR(4),
     created_date DATE
 );
+
+CREATE UNIQUE INDEX idx_cname_country
+ON coupon (coupon_name, country)

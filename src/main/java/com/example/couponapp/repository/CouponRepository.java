@@ -25,16 +25,26 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     )
     boolean couponExistsAndIsUsable(@Param("couponName") String couponName, @Param("country") String country);*/
 
-    @Modifying
-    @Query(
-            value = """
-            UPDATE coupon
-            SET current_usage = current_usage + 1
-            WHERE coupon_name = :couponName AND country = :country;
+    @Query(value = """
+            SELECT EXISTS(
+                SELECT 1 FROM customer_x_coupon cc
+                WHERE cc.customer_id = :customerId AND cc.coupon_id = :couponId
+                            )
             """,
             nativeQuery = true
     )
-    void updateCurrentUsageInCoupon(@Param("couponName") String couponName,@Param("country") String country);
+    boolean searchCouponIsRedeemedByCustomer(@Param("couponId") Long couponId, @Param("customerId") Long customerId);
+
+    @Modifying
+    @Query(
+            value = """
+                    UPDATE coupon
+                    SET current_usage = current_usage + 1
+                    WHERE coupon_name = :couponName
+                    """,
+            nativeQuery = true
+    )
+    void updateCurrentUsageInCoupon(@Param("couponName") String couponName);
 
     Optional<Coupon> findByCouponNameIsIgnoreCase(String couponName);
 

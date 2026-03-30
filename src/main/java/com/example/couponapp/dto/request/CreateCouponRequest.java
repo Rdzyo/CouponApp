@@ -8,16 +8,21 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import static com.example.couponapp.util.message.JakartaValidationMessagesUtil.VALUE_MORE_THAN_ZERO;
+import static com.example.couponapp.util.message.JakartaValidationMessagesUtil.VALUE_NOT_BLANK;
+import static com.example.couponapp.util.message.JakartaValidationMessagesUtil.VALUE_NOT_NULL;
+
 public record CreateCouponRequest(
-        @NotNull(message = "Value must not be null")
-        @NotBlank(message = "Value must not be empty")
+        @NotNull(message = VALUE_NOT_NULL)
+        @NotBlank(message = VALUE_NOT_BLANK)
         @Pattern(regexp = "^[a-zA-Z0-9]*$", message = "Coupon name only allows letters and numbers")
         @Schema(description = "Name of the coupon", defaultValue = "couponName")
         String couponName,
-        @Min(value = 1, message = "Value must be more than zero")
+        @Min(value = 1, message = VALUE_MORE_THAN_ZERO)
+        @Schema(description = "Maximum value of usages of the coupon", defaultValue = "10")
         Integer maxUsage,
-        @NotNull(message = "Value must not be null")
-        @NotBlank(message = "Value must not be empty")
+        @NotNull(message = VALUE_NOT_NULL)
+        @NotBlank(message = VALUE_NOT_BLANK)
         @Size(min = 2, max = 2, message = "Must be 2 letter ISO code")
         @Pattern(regexp = "[A-Z]+", message = "Country value should be ISO code of the country and must be capital letters")
         @Schema(description = "2-letter ISO Code of the country", defaultValue = "PL")
