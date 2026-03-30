@@ -46,6 +46,7 @@ public class CouponServiceImpl implements CouponService {
             var customer = customerOpt.get();
             incrementCouponUsage(couponName);
             saveCustomer(customer, coupon);
+            log.info("Customer with id: {} successfully redeemed coupon: {}", redeemCouponRequest.customerId(), couponName);
         }
         return ResponseEntity.ok().body(
                 RedeemCouponResponse.builder()
@@ -65,6 +66,7 @@ public class CouponServiceImpl implements CouponService {
                                     .build());
         } else {
             coupon = couponRepository.save(coupon);
+            log.debug("Coupon with the name {} created", coupon.getCouponName());
             return ResponseEntity.created(
                             ServletUriComponentsBuilder.fromPath("/createdCoupon/{id}")
                                     .buildAndExpand(coupon.getId())
